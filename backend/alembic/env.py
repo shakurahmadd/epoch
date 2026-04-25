@@ -7,6 +7,7 @@ from alembic import context
 from dotenv import load_dotenv
 from app.db.base import Base
 from app.models.station import Station
+from app.models.observations import Observation
 import os
 
 load_dotenv()
