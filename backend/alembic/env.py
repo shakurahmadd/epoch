@@ -8,6 +8,7 @@ from dotenv import load_dotenv
 from app.db.base import Base
 from app.models.station import Station
 from app.models.observations import Observation
+from app.models.climate_metrics import Climate_metric
 import os
 
 load_dotenv()
