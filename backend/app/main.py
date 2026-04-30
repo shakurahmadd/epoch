@@ -22,3 +22,15 @@ async def get_climate_history(location : str, db: AsyncSession = Depends(get_db)
     climate_metrics = await db.execute(text("""SELECT * FROM climate_metrics WHERE station_id = :src_id"""), {"src_id": station.src_id})
     climate_metric_rows = climate_metrics.fetchall()
     return [dict(row._mapping) for row in climate_metric_rows]
+
+
+@app.get("/climate/timeline/{location}/{birth_year}")
+async def get_birth_year_timeline(location : str, birth_year: int, db : AsyncSession = Depends(get_db)):
+    lon, lat = get_coordinates(location)
+    station = await get_nearest_station(lat, lon, db)
+    climate_timeline = await db.execute(text("""SELECT * FROM climate_metrics WHERE station_id = :src_id AND year >= :birth_year"""), 
+                                             {"src_id" : station.src_id, "birth_year" : birth_year})
+    climate_timeline = climate_timeline.fetchall()
+    return [dict(row._mapping) for row in climate_timeline]
+    
+ 
