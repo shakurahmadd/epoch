@@ -24,5 +24,11 @@ ml/models/*.bin
 # Node
 node_modules/
 
+# Jupyter notebooks
+*.ipynb
+
+# Logs
+logs/
+
 # OS
 .DS_Store
