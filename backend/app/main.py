@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, HTTPException
 from app.services.location import get_coordinates, get_nearest_station
 from dotenv import load_dotenv
 import os
@@ -18,6 +18,8 @@ def health_check():
 @app.get("/climate/history/{location}")
 async def get_climate_history(location : str, db: AsyncSession = Depends(get_db)):
     lon, lat = get_coordinates(location)
+    if (lon is None) or (lat is None):
+        raise HTTPException(status_code=400, detail="Postcode does not exist")
     station = await get_nearest_station(lat, lon, db)
     climate_metrics = await db.execute(text("""SELECT * FROM climate_metrics WHERE station_id = :src_id"""), {"src_id": station.src_id})
     climate_metric_rows = climate_metrics.fetchall()
@@ -27,6 +29,8 @@ async def get_climate_history(location : str, db: AsyncSession = Depends(get_db)
 @app.get("/climate/timeline/{location}/{birth_year}")
 async def get_birth_year_timeline(location : str, birth_year: int, db : AsyncSession = Depends(get_db)):
     lon, lat = get_coordinates(location)
+    if (lon is None) or (lat is None):
+        raise HTTPException(status_code=400, detail="Postcode does not exist")
     station = await get_nearest_station(lat, lon, db)
     climate_timeline = await db.execute(text("""SELECT * FROM climate_metrics WHERE station_id = :src_id AND year >= :birth_year"""), 
                                              {"src_id" : station.src_id, "birth_year" : birth_year})

@@ -12,7 +12,7 @@ def get_coordinates(postcode):
 
     except requests.exceptions.HTTPError as e:
         print(e)
-        return None
+        return None, None
     
 
 
