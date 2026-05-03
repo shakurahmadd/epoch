@@ -25,3 +25,4 @@ sqlalchemy[asyncio]
 psycopg2-binary
 pandas
 pytorch-forecasting pytorch-lightning
+groq
