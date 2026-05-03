@@ -9,6 +9,7 @@ from app.db.base import Base
 from app.models.station import Station
 from app.models.observations import Observation
 from app.models.climate_metrics import Climate_metric
+from app.models.climate_events import ClimateEvents
 import os
 
 load_dotenv()
