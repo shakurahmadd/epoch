@@ -6,9 +6,12 @@ from sqlalchemy import text
 from app.models.climate_metrics import Climate_metric
 from app.db.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
+from app.api.narrative import router as narrative_router
 
 
 app = FastAPI()
+
+app.include_router(narrative_router)
 
 @app.get("/health")
 def health_check():

@@ -23,12 +23,13 @@ async def get_relevant_events(db: AsyncSession, region: str, birth_year:int, k: 
     query = f"Climate events in {region} since {birth_year}"
     query_embedding = model.encode(query)
     query_embedding = query_embedding.tolist()
+    query_embedding = str(query_embedding)
 
-    result = await db.execute(text("""SELECT * 
-                                   FROM climate_events 
-                                   WHERE year > :year 
+    result = await db.execute(text("""SELECT title, summary, year, region
+                                   FROM climate_events
+                                   WHERE year > :year
                                    AND region IN (:region, :country, 'UK')
-                                   ORDER BY embedding <=> :query_embedding LIMIT :k"""), 
+                                   ORDER BY embedding <=> CAST(:query_embedding AS vector) LIMIT :k"""),
                                    {"year" : birth_year, 'region' : region, "query_embedding" : query_embedding, 'k' : k, 'country' : country})
     rows = result.fetchall()
     return [dict(row._mapping) for row in rows]
@@ -45,7 +46,7 @@ async def generate_narrative(climate_data, events, region, birth_year):
     Use only the climate data and historical events provided — do not add facts not present in the context.
     Always personalise the response to the specific region and birth year given."""
 
-    user_prompt = f"Write a climate summary for someone born in {birth_year} living in {region}.\n\n Climate data: \n\n {climate_data}.                                                                                                                             Relevant historical events: {events}." 
+    user_prompt = f"Write a climate summary for someone born in {birth_year} living in {region}.\n\nClimate data:\n{climate_data}\n\nRelevant historical events:\n{events}"
     chat_completion = await client.chat.completions.create(
         messages=[{
             "role" : "system",
@@ -55,7 +56,7 @@ async def generate_narrative(climate_data, events, region, birth_year):
             "role" : "user",
             "content": user_prompt,
         }],
-        model="llama-3.1-8b-instant",
+        model="llama-3.3-70b-versatile",
     )
     return chat_completion.choices[0].message.content
     
