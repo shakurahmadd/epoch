@@ -6,13 +6,24 @@ def get_coordinates(postcode):
     try:
         coordinates_response = requests.get(f"https://api.postcodes.io/postcodes/{postcode}")
         coordinates_response.raise_for_status()
-        lon = coordinates_response.json()['result']['longitude']
-        lat = coordinates_response.json()['result']['latitude']
+        result = coordinates_response.json()['result']
+        lon = result['longitude']
+        lat = result['latitude']
         return lon, lat
 
     except requests.exceptions.HTTPError as e:
         print(e)
         return None, None
+
+
+def get_region(postcode):
+    try:
+        coordinates_response = requests.get(f"https://api.postcodes.io/postcodes/{postcode}")
+        coordinates_response.raise_for_status()
+        result = coordinates_response.json()['result']
+        return result.get('region') or result.get('country') or 'UK'
+    except requests.exceptions.HTTPError:
+        return 'UK'
     
 
 

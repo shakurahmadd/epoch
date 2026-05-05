@@ -23,7 +23,11 @@ async def get_narrative(narrative_request : NarrativeRequest, db: AsyncSession =
     climate_metrics = climate_metrics.fetchall()
     climate_metrics = "\n".join([f"{row.year}: avg_max={row.avg_max_temp}, avg_min={row.avg_min_temp}, prcp={row.avg_prcp}, hot_days={row.hot_days}, frost_days={row.frost_days}, heavy_rain={row.heavy_rain_days}" for row in climate_metrics])
     events = await get_relevant_events(db, narrative_request.region, narrative_request.birth_year)
-    response = await generate_narrative(climate_metrics, events, narrative_request.region, narrative_request.birth_year)
-    return response 
+    narrative = await generate_narrative(climate_metrics, events, narrative_request.region, narrative_request.birth_year)
+    return {
+        "narrative": narrative,
+        "region": narrative_request.region,
+        "birth_year": narrative_request.birth_year,
+    }
 
 
