@@ -76,3 +76,5 @@ async def get_climate_forecast(postcode: str, db: AsyncSession = Depends(get_db)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+ 
+ 

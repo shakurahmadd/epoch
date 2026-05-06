@@ -6,6 +6,7 @@ import SearchForm from '../components/SearchForm'
 import TemperatureChart from '../components/TemperatureChart'
 import RainfallChart from '../components/RainfallChart'
 import NarrativeCard from '../components/NarrativeCard'
+import ShareCard from '../components/ShareCard'
 
 export default function ClimateTimeline() {
   const [loading, setLoading] = useState<boolean>(false)
@@ -89,6 +90,12 @@ export default function ClimateTimeline() {
                 narrative={narrative.narrative}
                 region={narrative.region}
                 birthYear={narrative.birth_year}
+              />
+              <ShareCard
+                stationName={timeline.station_name}
+                birthYear={searchValues.birthYear}
+                metrics={timeline.metrics}
+                narrative={narrative.narrative}
               />
             </>
           )}
