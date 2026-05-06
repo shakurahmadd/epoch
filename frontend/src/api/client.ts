@@ -1,5 +1,5 @@
 import axios from 'axios'
-import type {NarrativeResponse, TimelineResponse} from '../types/climate'
+import type {NarrativeResponse, TimelineResponse, ForecastResponse} from '../types/climate'
 
 
 export async function fetchTimeline(
@@ -24,5 +24,12 @@ export async function fetchNarrative(
         region: region,
         postcode: postcode
     })
+    return data
+}
+
+export async function fetchForecast(
+    postcode: string
+): Promise<ForecastResponse> {
+    const { data } = await axios.get<ForecastResponse>(`/api/climate/forecast/${postcode}`)
     return data
 }

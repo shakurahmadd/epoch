@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Container, Box, Alert, CircularProgress, Typography, Divider } from '@mui/material'
-import type { TimelineResponse, NarrativeResponse, SearchValues } from '../types/climate'
-import { fetchTimeline, fetchNarrative } from '../api/client'
+import { Container, Box, Alert, CircularProgress, Typography, Divider} from '@mui/material'
+import type { TimelineResponse, NarrativeResponse, SearchValues, ForecastResponse } from '../types/climate'
+import { fetchTimeline, fetchNarrative, fetchForecast } from '../api/client'
 import SearchForm from '../components/SearchForm'
 import TemperatureChart from '../components/TemperatureChart'
 import RainfallChart from '../components/RainfallChart'
@@ -13,6 +13,7 @@ export default function ClimateTimeline() {
   const [searchValues, setSearchValues] = useState<SearchValues | null>(null)
   const [timeline, setTimeline] = useState<TimelineResponse | null>(null)
   const [narrative, setNarrative] = useState<NarrativeResponse | null>(null)
+  const [forecast, setForecast] = useState<ForecastResponse | null>(null)
 
   async function handleSearch(values: SearchValues) {
     setLoading(true)
@@ -20,6 +21,7 @@ export default function ClimateTimeline() {
     setTimeline(null)
     setNarrative(null)
     setSearchValues(values)
+    setForecast(null)
 
     try {
       const timelineData = await fetchTimeline(values.postcode, values.birthYear)
@@ -27,6 +29,9 @@ export default function ClimateTimeline() {
 
       const narrativeData = await fetchNarrative(values.birthYear, timelineData.region, values.postcode)
       setNarrative(narrativeData)
+
+      const forecastData = await fetchForecast(values.postcode)
+      setForecast(forecastData)
     } catch (err) {
       setError('Could not load climate data. Check the postcode and try again.')
     } finally {
@@ -66,6 +71,7 @@ export default function ClimateTimeline() {
 
           <TemperatureChart
             metrics={timeline.metrics}
+            forecast={forecast?.forecast ?? []}
             birthYear={searchValues.birthYear}
             stationName={timeline.station_name}
           />
@@ -75,7 +81,7 @@ export default function ClimateTimeline() {
             birthYear={searchValues.birthYear}
             stationName={timeline.station_name}
           />
-
+          
           {narrative && (
             <>
               <Divider />

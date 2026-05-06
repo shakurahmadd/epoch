@@ -28,3 +28,17 @@ export interface SearchValues {
   postcode: string
   birthYear: number
 }
+
+
+export interface ForecastPoint {
+  year: number
+  q10: number
+  q50: number
+  q90: number 
+  
+}
+
+export interface ForecastResponse {
+  station_name : string
+  forecast : ForecastPoint[]
+}
