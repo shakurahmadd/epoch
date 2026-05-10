@@ -67,14 +67,24 @@ def parse_rainfall(response):
 
 
 def insert_observations(df, session):
+    from sqlalchemy import text
     for index, row in df.iterrows():
         if 'ob_end_time' in row.index:
-            db_obs_row = Observation(station_id=row['src_id'], date=row['ob_end_time'],                                 
-                                    max_air_temp = row['max_air_temp'], min_air_temp=row['min_air_temp'], prcp_amt=None)
-            session.merge(db_obs_row)
+            session.execute(text("""
+                INSERT INTO observations (station_id, date, max_air_temp, min_air_temp, prcp_amt)
+                VALUES (:sid, :date, :max_t, :min_t, NULL)
+                ON CONFLICT (station_id, date) DO UPDATE SET
+                    max_air_temp = COALESCE(observations.max_air_temp, EXCLUDED.max_air_temp),
+                    min_air_temp = COALESCE(observations.min_air_temp, EXCLUDED.min_air_temp)
+            """), {"sid": row['src_id'], "date": row['ob_end_time'],
+                   "max_t": row['max_air_temp'], "min_t": row['min_air_temp']})
         else:
-            db_obs_row = Observation(station_id=row['src_id'], date=row['ob_date'], prcp_amt=row['prcp_amt'])
-            session.merge(db_obs_row)
+            session.execute(text("""
+                INSERT INTO observations (station_id, date, max_air_temp, min_air_temp, prcp_amt)
+                VALUES (:sid, :date, NULL, NULL, :prcp)
+                ON CONFLICT (station_id, date) DO UPDATE SET
+                    prcp_amt = COALESCE(observations.prcp_amt, EXCLUDED.prcp_amt)
+            """), {"sid": row['src_id'], "date": row['ob_date'], "prcp": row['prcp_amt']})
     session.commit()
     return "Observation rows have been added"
 
