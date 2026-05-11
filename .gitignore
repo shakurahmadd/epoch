@@ -30,5 +30,9 @@ node_modules/
 # Logs
 logs/
 
+# Claude Code
+.claude/
+memory/
+
 # OS
 .DS_Store

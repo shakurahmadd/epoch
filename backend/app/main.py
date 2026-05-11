@@ -9,6 +9,7 @@ from app.db.database import get_db
 from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.narrative import router as narrative_router
 from app.services.forecast import get_forecast as forecast_service
+from app.services.anomaly import get_anomalies as anomaly_service
 
 
 def clean_row(row: dict) -> dict:
@@ -73,6 +74,14 @@ async def get_birth_year_timeline(location : str, birth_year: int, db : AsyncSes
 async def get_climate_forecast(postcode: str, db: AsyncSession = Depends(get_db)):
     try:
         return await forecast_service(postcode, db)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@app.get("/climate/anomalies/{postcode}")
+async def get_climate_anomalies(postcode: str, db: AsyncSession = Depends(get_db)):
+    try:
+        return await anomaly_service(postcode, db)
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 

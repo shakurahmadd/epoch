@@ -36,10 +36,14 @@ def prepare_station(conn, station_id):
     if stats[0] is None or stats[1] is None or stats[1] == 0:
         return
 
+    def safe(v, fallback):
+        return fallback if (v is None or (isinstance(v, float) and np.isnan(v)) or v == 0) else v
+
     mean_max, std_max, mean_min, std_min, mean_rain, std_rain = stats
-    std_min = std_min or 1.0
-    mean_rain = mean_rain if mean_rain is not None else 0.0
-    std_rain = std_rain or 1.0
+    mean_min = safe(mean_min, 0.0)
+    std_min = safe(std_min, 1.0)
+    mean_rain = safe(mean_rain, 0.0)
+    std_rain = safe(std_rain, 1.0)
 
     # Identify normal years — annual mean max_air_temp within 2σ of long-run mean
     annual = conn.execute(text("""
@@ -72,10 +76,13 @@ def prepare_station(conn, station_id):
     # Impute nulls with long-run means, then normalise with global station statistics
     dates = []
     values = []
+    def is_missing(v):
+        return v is None or (isinstance(v, float) and np.isnan(v))
+
     for ob_date, max_t, min_t, rain in rows:
-        max_t = max_t if max_t is not None else mean_max
-        min_t = min_t if min_t is not None else mean_min
-        rain = rain if rain is not None else mean_rain
+        max_t = max_t if not is_missing(max_t) else mean_max
+        min_t = min_t if not is_missing(min_t) else mean_min
+        rain = rain if not is_missing(rain) else mean_rain
         values.append([
             (max_t - mean_max) / std_max,
             (min_t - mean_min) / std_min,

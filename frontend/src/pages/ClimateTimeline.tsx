@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Container, Box, Alert, CircularProgress, Typography, Divider} from '@mui/material'
-import type { TimelineResponse, NarrativeResponse, SearchValues, ForecastResponse } from '../types/climate'
-import { fetchTimeline, fetchNarrative, fetchForecast } from '../api/client'
+import type { TimelineResponse, NarrativeResponse, SearchValues, ForecastResponse, AnomalyPeriod } from '../types/climate'
+import { fetchTimeline, fetchNarrative, fetchForecast, fetchAnomalies } from '../api/client'
 import SearchForm from '../components/SearchForm'
 import TemperatureChart from '../components/TemperatureChart'
 import RainfallChart from '../components/RainfallChart'
@@ -15,6 +15,7 @@ export default function ClimateTimeline() {
   const [timeline, setTimeline] = useState<TimelineResponse | null>(null)
   const [narrative, setNarrative] = useState<NarrativeResponse | null>(null)
   const [forecast, setForecast] = useState<ForecastResponse | null>(null)
+  const [anomalies, setAnomalies] = useState<AnomalyPeriod[]>([])
 
   async function handleSearch(values: SearchValues) {
     setLoading(true)
@@ -23,6 +24,7 @@ export default function ClimateTimeline() {
     setNarrative(null)
     setSearchValues(values)
     setForecast(null)
+    setAnomalies([])
 
     try {
       const timelineData = await fetchTimeline(values.postcode, values.birthYear)
@@ -33,6 +35,13 @@ export default function ClimateTimeline() {
 
       const forecastData = await fetchForecast(values.postcode)
       setForecast(forecastData)
+
+      try {
+        const anomalyData = await fetchAnomalies(values.postcode)
+        setAnomalies(anomalyData)
+      } catch {
+        // anomalies are optional — no model for this station is fine
+      }
     } catch (err) {
       setError('Could not load climate data. Check the postcode and try again.')
     } finally {
@@ -75,6 +84,7 @@ export default function ClimateTimeline() {
             forecast={forecast?.forecast ?? []}
             birthYear={searchValues.birthYear}
             stationName={timeline.station_name}
+            anomalies={anomalies}
           />
 
           <RainfallChart

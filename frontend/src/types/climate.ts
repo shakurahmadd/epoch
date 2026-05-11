@@ -42,3 +42,9 @@ export interface ForecastResponse {
   station_name : string
   forecast : ForecastPoint[]
 }
+
+export interface AnomalyPeriod {
+  start_date: string
+  end_date: string
+  severity: number
+}
